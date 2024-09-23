@@ -14,9 +14,8 @@ func main() {
 	options := SDK.NewEdgeAgentOptions()
 	options.DataRecover = true
 	options.NodeID = "YOUR_NODE_ID"
-	options.ConnectType = SDK.ConnectType["DCCS"]
-	options.DCCS.Key = "YOUR_CREDENTIAL_KEY"
-	options.DCCS.URL = "YOUR_API_URL"
+	options.ConnectType = SDK.ConnectType["AzureIoTHub"]
+	options.AzureIoTHubOptions.ConnectionString = "YOUR_AZURE_CONNECTION_STRING"
 
 	interval := 10
 	var timer chan bool = nil

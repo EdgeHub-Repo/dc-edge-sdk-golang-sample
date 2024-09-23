@@ -3,33 +3,22 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"runtime"
 	"time"
 
 	SDK "github.com/EdgeHub-Repo/dc-edge-sdk-golang"
 )
 
 func main() {
-
-	go func() {
-		for {
-			runtime.NumGoroutine()
-			// fmt.Printf("goroutine num = %d\n", NumGoroutine)
-			time.Sleep(5 * time.Second)
-		}
-	}()
-
 	quit := make(chan bool)
 
 	options := SDK.NewEdgeAgentOptions()
-
 	options.DataRecover = true
-	options.NodeID = "98e1c5d0-6c19-11ef-817e-750e252956f7"
+	options.NodeID = "YOUR_NODE_ID"
 	options.ConnectType = SDK.ConnectType["DCCS"]
-	options.DCCS.Key = "4153cc4ee81168e01d4f83bca76ceeia"
-	options.DCCS.URL = "http://api-dccs-ensaas.isghpc.wise-paas.com/"
+	options.DCCS.Key = "YOUR_CREDENTIAL_KEY"
+	options.DCCS.URL = "YOUR_API_URL"
 
-	interval := 1
+	interval := 10
 	var timer chan bool = nil
 
 	agent := SDK.NewAgent(options)
@@ -48,7 +37,7 @@ func main() {
 				data := generateData()
 				ok := agent.SendData(data)
 				if ok {
-					fmt.Println(data)
+					fmt.Println("send data: ", data)
 				}
 			}, interval, true)
 		}
@@ -61,6 +50,7 @@ func main() {
 		message := args.Message
 		switch msgType {
 		case SDK.MessageType["WriteValue"]: // message format: WriteDataMessage
+			fmt.Println("receive write value message: ", message.(SDK.ConfigAckMessage).Result)
 			for _, device := range message.(SDK.WriteDataMessage).DeviceList {
 				fmt.Println("DeviceId: ", device.ID)
 				for _, tag := range device.TagList {
@@ -68,15 +58,16 @@ func main() {
 				}
 			}
 		case SDK.MessageType["ConfigAck"]: // message format: ConfigAckMessage
-			fmt.Println(message.(SDK.ConfigAckMessage).Result)
+			fmt.Println("receive config ack message: ", message.(SDK.ConfigAckMessage).Result)
 		case SDK.MessageType["TimeSync"]: //message format: TimeSyncMessage
-			fmt.Println(message.(SDK.TimeSyncMessage).UTCTime)
+			fmt.Println("receive time sync message: ", message.(SDK.TimeSyncMessage).UTCTime)
 		}
 	})
 
 	err := agent.Connect()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Failed to connect: ", err)
+		return
 	}
 	<-quit
 }
@@ -176,7 +167,6 @@ func generateData() SDK.EdgeData {
 	deviceNum := 1
 	msg := SDK.EdgeData{
 		Timestamp: time.Now(),
-		//Timestamp: time.Date(2020, time.Month(10), 14, 16, 50, 33, 983, time.Local)	// customized time stamp format
 	}
 
 	for idx := 0; idx < deviceNum; idx++ {
@@ -191,7 +181,6 @@ func generateData() SDK.EdgeData {
 					TagName:  fmt.Sprintf("%s:%s%d", blockName, "ATag", num+1),
 					Value:    rand.Float64(),
 				}
-				//fmt.Println(rand.Float64())
 
 				msg.TagList = append(msg.TagList, t)
 			}
