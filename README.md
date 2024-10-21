@@ -1,4 +1,4 @@
-# WISEPaaS.DataHub.Edge.GO.SDK.Sample
+# EdgeSync360 EdgeHub Golang SDK Example
 
 ## Prepare
 
